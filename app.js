@@ -1,25 +1,21 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 
 const app = express();
-app.set("port", process.env.PORT || 3000);
+app.set("port", process.env.PORT || 8080);
 app.use("/public", express.static("public"));
 app.use(express.json());
 
 // MongoDB와의 연결 설정
-
-const MONGODB_ID = "kimsuhyun";
-const MONGODB_PASSWORD = "suhyun90%40";
-const MONGODB_ENDPOINT = "cluster0.n3gcvs0.mongodb.net";
-const MONGODB_DB = "practice";
-
 mongoose
-  .connect(
-    `mongodb+srv://${MONGODB_ID}:${MONGODB_PASSWORD}@${MONGODB_ENDPOINT}/${MONGODB_DB}`,
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(`${process.env.MONGODB}`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("Successfully connected to mongodb"))
   .catch((e) => console.error(e));
 
