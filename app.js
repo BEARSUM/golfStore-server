@@ -1,10 +1,12 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 
 const app = express();
-app.set("port", process.env.PORT);
+app.set("port", process.env.PORT || 8080);
 app.use("/public", express.static("public"));
 app.use(express.json());
 
