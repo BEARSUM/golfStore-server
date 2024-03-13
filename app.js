@@ -19,12 +19,20 @@ mongoose
   .then(() => console.log("Successfully connected to mongodb"))
   .catch((e) => console.error(e));
 
-// 모든 도메인에서의 API 요청을 허용하도록 설정
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+const whitelist = ["http://127.0.0.1:5502"]; // 클라이언트 주소
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // 요청의 인증 정보를 포함합니다.
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
