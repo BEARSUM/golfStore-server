@@ -1,34 +1,38 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 
 const app = express();
-app.set("port", process.env.PORT || 3000);
+app.set("port", process.env.PORT || 8080);
 app.use("/public", express.static("public"));
 app.use(express.json());
 
 // MongoDB와의 연결 설정
-
-const MONGODB_ID = "kimsuhyun";
-const MONGODB_PASSWORD = "suhyun90%40";
-const MONGODB_ENDPOINT = "cluster0.n3gcvs0.mongodb.net";
-const MONGODB_DB = "practice";
-
 mongoose
-  .connect(
-    `mongodb+srv://${MONGODB_ID}:${MONGODB_PASSWORD}@${MONGODB_ENDPOINT}/${MONGODB_DB}`,
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(`${process.env.MONGODB}`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("Successfully connected to mongodb"))
   .catch((e) => console.error(e));
 
-// 모든 도메인에서의 API 요청을 허용하도록 설정
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+const whitelist = ["http://127.0.0.1:5502"]; // 클라이언트 주소
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // 요청의 인증 정보를 포함합니다.
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

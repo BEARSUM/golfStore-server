@@ -1,3 +1,4 @@
+const User = require("./userModel");
 const userService = require("./userService");
 
 //회원가입
@@ -27,8 +28,22 @@ const signUp = async (req, res) => {
 const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const result = await userService.signIn(email, password);
-    res.json(result);
+
+    const { accessToken, refreshToken, targetUser } = await userService.signIn(
+      email,
+      password
+    );
+
+    //refresh token을 DB에 저장합니다.
+    const user = await User.findOne({ email });
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.status(200).json({
+      accessToken,
+      refreshToken,
+      targetUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -150,6 +165,7 @@ const getUserByToken = async (req, res, next) => {
     const user = await userService.getUserByToken(token);
     res.json(user);
   } catch (error) {
+    // console.log("userController getUserByToken error", error);
     next(error);
   }
 };

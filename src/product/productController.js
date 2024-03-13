@@ -2,7 +2,6 @@ const productService = require("./productService");
 const categoryService = require("../category/categoryService");
 
 const fs = require("fs");
-const upload = require("./multer");
 
 // 상품 생성
 const createProduct = async (req, res, next) => {
