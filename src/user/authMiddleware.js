@@ -1,5 +1,6 @@
-const jwt = require("jsonwebtoken");
-const userService = require("./userService");
+const { verify } = require("jsonwebtoken");
+require("dotenv").config();
+const secretKey = process.env.SECRET_KEY;
 
 const adminOnlyMiddleware = async (req, res, next) => {
   if (req.user.isAdmin) {
@@ -11,14 +12,17 @@ const adminOnlyMiddleware = async (req, res, next) => {
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization.split("Bearer ")[1];
     if (!token) {
-      return res.status(401).json({ error: "인증되지 않은 요청입니다." });
+      return res.status(401).json({ error: "noToken" });
     }
 
-    const user = await userService.getUserByToken(token.split(" ")[1]);
+    const user = verify(token, secretKey);
+
     if (!user) {
-      return res.status(401).json({ error: "유효하지 않은 토큰입니다." });
+      // console.log("middleware - noUser");
+
+      return res.status(401).json({ error: "noUser" });
     }
 
     req.user = user;
@@ -33,7 +37,9 @@ const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(401).json({ error: "유효하지 않은 토큰입니다." });
+    // console.log("middleware - Access token expired");
+
+    res.status(401).json({ error: "expired" });
   }
 };
 
